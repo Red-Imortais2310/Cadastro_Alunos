@@ -1,96 +1,68 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Content-Type');
-
-// Conexão com banco de dados
-$host = 'localhost';
-$dbname = 'cadastroalunos';
-$user = 'root';
-$pass = '';
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    echo json_encode(['success' => false, 'message' => 'Erro na conexão com o banco: ' . $e->getMessage()]);
-    exit;
-}
+    // Conexão com banco
+    $conn = new mysqli('localhost', 'root', '', 'escola');
+    $conn->set_charset('utf8mb4');
 
-// Processar cadastro
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    
-    // Receber dados
-    $nome = trim($_POST['nome'] ?? '');
-    $dataNasc = trim($_POST['dataNasc'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $curso = trim($_POST['curso'] ?? '');
-    $endereco = trim($_POST['endereco'] ?? '');
-    
-    // Validações
-    if (empty($nome) || empty($dataNasc) || empty($email) || empty($curso) || empty($endereco)) {
-        echo json_encode(['success' => false, 'message' => 'Todos os campos são obrigatórios']);
-        exit;
+    if ($conn->connect_error) {
+        throw new Exception('Erro na conexão: ' . $conn->connect_error);
     }
-    
-    // Upload de foto
-    $fotoNome = null;
-    if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = dirname(__DIR__) . '/uploads/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-        
-        $extensao = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
-        $permitidos = ['jpg', 'jpeg', 'png', 'gif'];
-        
-        if (!in_array($extensao, $permitidos)) {
-            echo json_encode(['success' => false, 'message' => 'Formato de imagem não permitido']);
-            exit;
-        }
-        
-        $fotoNome = uniqid('foto_') . '.' . $extensao;
-        $fotoPath = $uploadDir . $fotoNome;
-        
-        if (!move_uploaded_file($_FILES['foto']['tmp_name'], $fotoPath)) {
-            echo json_encode(['success' => false, 'message' => 'Erro ao fazer upload da foto']);
-            exit;
-        }
+
+    // Recebe dados
+    $nome = $_POST['nome'] ?? '';
+    $data_nascimento = $_POST['data_nascimento'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $curso = $_POST['curso'] ?? '';
+    $endereco = $_POST['endereco'] ?? '';
+
+    // Validação
+    if (empty($nome) || empty($data_nascimento) || empty($email) || empty($curso) || empty($endereco)) {
+        throw new Exception('Todos os campos são obrigatórios');
     }
-    
-    // Inserir no banco - SEM incluir dataCad (será preenchida automaticamente)
-    try {
-        $sql = "INSERT INTO alunos (nome, dataNasc, email, curso, endereco, foto) 
-                VALUES (:nome, :dataNasc, :email, :curso, :endereco, :foto)";
-        
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':nome', $nome);
-        $stmt->bindParam(':dataNasc', $dataNasc);
-        $stmt->bindParam(':email', $email);
-        $stmt->bindParam(':curso', $curso);
-        $stmt->bindParam(':endereco', $endereco);
-        $stmt->bindParam(':foto', $fotoNome);
-        
-        $stmt->execute();
-        
-        echo json_encode([
-            'success' => true, 
-            'message' => 'Aluno cadastrado com sucesso!',
-            'id' => $pdo->lastInsertId()
-        ]);
-        
-    } catch (PDOException $e) {
-        // Se foi erro de email duplicado
-        if ($e->getCode() == 23000) {
-            echo json_encode(['success' => false, 'message' => 'Este email já está cadastrado']);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Erro ao cadastrar: ' . $e->getMessage()]);
-        }
+
+    // Upload da foto
+    if (!isset($_FILES['foto']) || $_FILES['foto']['error'] !== UPLOAD_ERR_OK) {
+        throw new Exception('Erro no upload da foto');
     }
-    
-} else {
-    echo json_encode(['success' => false, 'message' => 'Método não permitido']);
+
+    $foto = $_FILES['foto'];
+    $extensao = strtolower(pathinfo($foto['name'], PATHINFO_EXTENSION));
+    $extensoes_permitidas = ['jpg', 'jpeg', 'png', 'gif'];
+
+    if (!in_array($extensao, $extensoes_permitidas)) {
+        throw new Exception('Formato de imagem inválido');
+    }
+
+    if ($foto['size'] > 4 * 1024 * 1024) {
+        throw new Exception('Imagem muito grande. Máximo 4MB');
+    }
+
+    // Salvar foto
+    $nome_foto = uniqid() . '.' . $extensao;
+    $caminho_foto = '../uploads/' . $nome_foto;
+
+    if (!is_dir('../uploads')) {
+        mkdir('../uploads', 0777, true);
+    }
+
+    if (!move_uploaded_file($foto['tmp_name'], $caminho_foto)) {
+        throw new Exception('Erro ao salvar foto');
+    }
+
+    // Inserir no banco
+    $stmt = $conn->prepare("INSERT INTO alunos (nome, data_nascimento, email, curso, endereco, foto) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssssss", $nome, $data_nascimento, $email, $curso, $endereco, $nome_foto);
+
+    if (!$stmt->execute()) {
+        throw new Exception('Erro ao cadastrar: ' . $stmt->error);
+    }
+
+    echo json_encode(['success' => true, 'message' => 'Aluno cadastrado com sucesso']);
+
+} catch (Exception $e) {
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
 ?>
 
