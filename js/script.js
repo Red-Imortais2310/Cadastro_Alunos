@@ -1,3 +1,6 @@
+// ============== CONFIGURAÇÃO INICIAL ==============
+console.log('🚀 Sistema de Cadastro inicializado');
+
 // ============== PREVIEW DA FOTO ==============
 const fotoInput = document.getElementById('foto');
 const fotoPreview = document.getElementById('fotoPreview');
@@ -106,14 +109,14 @@ if (formAluno) {
             });
 
             const text = await response.text();
-            console.log('Resposta do servidor:', text);
+            console.log('📥 Resposta do servidor:', text);
 
             // Tentar parsear como JSON
             let data;
             try {
                 data = JSON.parse(text);
             } catch (e) {
-                console.error('Erro ao parsear JSON:', text);
+                console.error('❌ Erro ao parsear JSON:', text);
                 throw new Error('Erro de comunicação com o servidor.');
             }
 
@@ -137,7 +140,7 @@ if (formAluno) {
             }
 
         } catch (error) {
-            console.error('Erro:', error);
+            console.error('❌ Erro:', error);
             alert('❌ Erro ao cadastrar aluno: ' + error.message);
         } finally {
             btnSubmit.disabled = false;
@@ -146,24 +149,10 @@ if (formAluno) {
     });
 }
 
-// ============== OCULTAR ELEMENTOS DESNECESSÁRIOS ==============
-// Ocultar campo de busca se existir
-const searchInput = document.getElementById('searchInput');
-if (searchInput) {
-    searchInput.style.display = 'none';
-}
-
-// Ocultar tabela se existir
+// ============== OCULTAR SEÇÃO DE TABELA ==============
 const tabelaSection = document.querySelector('.table-section');
 if (tabelaSection) {
-    tabelaSection.style.display = 'none';
+    tabelaSection.remove(); // Remove completamente do DOM
 }
 
-const alunosTabela = document.getElementById('alunosTabela');
-if (alunosTabela) {
-    alunosTabela.innerHTML = '';
-}
-
-console.log('✅ Sistema de cadastro carregado com sucesso!');
-
-
+console.log('✅ Sistema pronto para uso!');
