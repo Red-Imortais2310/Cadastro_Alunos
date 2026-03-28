@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Alunos - IFSP</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>📚 Sistema de Cadastro de Alunos</h1>
+                <p class="subtitle">Instituto Federal de São Paulo - IFSP</p>
+            </div>
+        </header>
+
+        <main>
+            <!-- Formulário de Cadastro -->
+            <section class="form-section">
+                <h2>Cadastrar Novo Aluno</h2>
+                <form id="formAluno">
+                    <div class="form-grid">
+                        <!-- Campo de Foto -->
+                        <div class="form-group full-width">
+                            <label for="foto">Foto do Aluno (Máx. 4MB)</label>
+                            <div class="foto-upload">
+                                <div class="foto-preview" id="fotoPreview">
+                                    <img id="imagemPreview" src="" alt="Preview da foto" style="display: none;">
+                                    <div class="foto-placeholder">
+                                        <span>📷</span>
+                                        <p>Clique para selecionar uma foto</p>
+                                    </div>
+                                </div>
+                                <input type="file" id="foto" accept="image/*" style="display: none;">
+                                <button type="button" class="btn-upload" onclick="document.getElementById('foto').click()">
+                                    📁 Escolher Foto
+                                </button>
+                                <small class="file-info" id="fileInfo">Nenhum arquivo selecionado</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nome">Nome Completo *</label>
+                            <input type="text" id="nome" required placeholder="Digite o nome completo">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dataNasc">Data de Nascimento *</label>
+                            <input type="date" id="dataNasc" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">E-mail *</label>
+                            <input type="email" id="email" required placeholder="email@aluno.ifsp.edu.br">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="curso">Curso *</label>
+                            <select id="curso" required>
+                                <option value="">Selecione um curso</option>
+                                <option value="Informática">Informática</option>
+                                <option value="Eletrônica">Eletrônica</option>
+                                <option value="Mecânica">Mecânica</option>
+                                <option value="Edificações">Edificações</option>
+                                <option value="Administração">Administração</option>
+                                <option value="Química">Química</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="endereco">Endereço Completo *</label>
+                            <input type="text" id="endereco" required placeholder="Rua, número, bairro - cidade">
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            ➕ Cadastrar Aluno
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Tabela de Alunos -->
+            <section class="table-section">
+                <div class="table-header">
+                    <h2>Lista de Alunos Cadastrados</h2>
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="🔍 Buscar aluno...">
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table id="tabelaAlunos">
+                        <thead>
+                            <tr>
+                                <th>Foto</th>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Data Nasc.</th>
+                                <th>E-mail</th>
+                                <th>Endereço</th>
+                                <th>Data Cadastro</th>
+                                <th>Curso</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alunosTabela">
+                            <tr>
+                                <td colspan="8" class="loading">Carregando dados...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>© 2026 IFSP - Instituto Federal de São Paulo | Desenvolvido por Os Intocáveis Web Designers</p>
+        </footer>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
+
